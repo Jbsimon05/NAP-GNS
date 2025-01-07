@@ -15,14 +15,15 @@ def generate_config(router, as_config):
     for interface in router['interfaces']:
         config.append(f"interface {interface['name']}")
         config.append(f" ipv6 address {interface['ip']}")
+        config.append(" no shutdown")
         config.append("!")
 
     # IGP configuration
     if as_config['IGP'] == "RIP":
         config.append("ipv6 unicast-routing")
-        config.append("ipv6 router rip RIP_PROCESS")
+        config.append("ipv6 router rip NAME_OF_PROCESS")
         for interface in router['interfaces']:
-            config.append(f" interface {interface['name']}")
+            config.append(f" network {interface['ip'].split('/')[0]}")
         config.append("!")
     elif as_config['IGP'] == "OSPF":
         config.append("ipv6 unicast-routing")
@@ -37,7 +38,7 @@ def generate_config(router, as_config):
     config.append(f"router bgp {router['bgp']['asn']}")
     config.append(" bgp log-neighbor-changes")
     for neighbor in router['bgp']['neighbors']:
-        config.append(f" neighbor {neighbor['ip']} remote-as {neighbor['remote_as']}")
+        config.append(f" neighbor {neighbor['ip'].split('/')[0]} remote-as {neighbor['remote_as']}")
     config.append("!")
 
     return "\n".join(config)
@@ -45,12 +46,27 @@ def generate_config(router, as_config):
 def deploy_config_to_gns3(router_name, config, hostname, port, username, password):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(hostname, port=port, username=username, password=password)
+    ssh.connect(hostname, port=port, username=username, password=password, look_for_keys=False, allow_agent=False)
 
+    # Enter enable mode
+    stdin, stdout, stderr = ssh.exec_command("enable")
+    stdout.channel.recv_exit_status()
+
+    # Enter global configuration mode
+    stdin, stdout, stderr = ssh.exec_command("configure terminal")
+    stdout.channel.recv_exit_status()
+
+    # Apply configuration
     commands = config.split("\n")
     for command in commands:
         stdin, stdout, stderr = ssh.exec_command(command)
         stdout.channel.recv_exit_status()
+
+    # Exit configuration mode and save
+    stdin, stdout, stderr = ssh.exec_command("end")
+    stdout.channel.recv_exit_status()
+    stdin, stdout, stderr = ssh.exec_command("write memory")
+    stdout.channel.recv_exit_status()
 
     ssh.close()
 
@@ -58,8 +74,8 @@ def main():
     with open('config.json', 'r') as f:
         data = json.load(f)
 
-    gns3_host = "localhost"
-    gns3_port = 22
+    gns3_host = "::1"  # Utilisation de l'adresse IPv6 localhost
+    gns3_port = 3080
     gns3_username = "admin"
     gns3_password = "admin"
 
