@@ -12,7 +12,7 @@
 
 ## Configuration des routeurs
 
-Les configurations des routeurs sont générées à partir d'un fichier JSON contenant les informations nécessaires. Le script Python `generate_config.py` lit ce fichier JSON et génère les configurations des routeurs.
+Les configurations des routeurs sont générées à partir d'un fichier JSON contenant les informations nécessaires. Le script Python `main.py` lit ce fichier JSON et génère les configurations des routeurs.
 
 ### Fichier JSON de configuration
 
