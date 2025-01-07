@@ -8,6 +8,6 @@
 
 - AS Y (OSPF)
 
- Loopback interfaces: 2001:db8:3::/64
+  Loopback interfaces: 2001:db8:3::/64
 
- Physical interfaces: 2001:db8:4::/64
+  Physical interfaces: 2001:db8:4::/64
