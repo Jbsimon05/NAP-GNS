@@ -1,5 +1,5 @@
 import json
-import telnetlib
+import paramiko
 
 def generate_config(router, as_config):
     config = []
@@ -42,26 +42,31 @@ def generate_config(router, as_config):
 
     return "\n".join(config)
 
-def deploy_config_to_gns3(router_name, config, gns3_host, gns3_port):
-    tn = telnetlib.Telnet(gns3_host, gns3_port)
-    tn.write(b"enable\n")
-    tn.write(b"configure terminal\n")
-    tn.write(config.encode('ascii'))
-    tn.write(b"end\n")
-    tn.write(b"write memory\n")
-    tn.close()
+def deploy_config_to_gns3(router_name, config, hostname, port, username, password):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(hostname, port=port, username=username, password=password)
+
+    commands = config.split("\n")
+    for command in commands:
+        stdin, stdout, stderr = ssh.exec_command(command)
+        stdout.channel.recv_exit_status()
+
+    ssh.close()
 
 def main():
     with open('config.json', 'r') as f:
         data = json.load(f)
 
     gns3_host = "localhost"
-    gns3_port = 8000
+    gns3_port = 22
+    gns3_username = "admin"
+    gns3_password = "admin"
 
     for as_name, as_config in data.items():
         for router in as_config['routers']:
             config = generate_config(router, as_config)
-            deploy_config_to_gns3(router['name'], config, gns3_host, gns3_port)
+            deploy_config_to_gns3(router['name'], config, gns3_host, gns3_port, gns3_username, gns3_password)
 
 if __name__ == "__main__":
     main()
