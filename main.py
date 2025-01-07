@@ -1,4 +1,5 @@
 import json
+import telnetlib
 
 def generate_config(router, as_config):
     config = []
@@ -35,20 +36,32 @@ def generate_config(router, as_config):
     # BGP configuration
     config.append(f"router bgp {router['bgp']['asn']}")
     config.append(" bgp log-neighbor-changes")
-    config.append(f" neighbor {router['bgp']['neighbors'][0]['ip']} remote-as {router['bgp']['neighbors'][0]['remote_as']}")
+    for neighbor in router['bgp']['neighbors']:
+        config.append(f" neighbor {neighbor['ip']} remote-as {neighbor['remote_as']}")
     config.append("!")
 
     return "\n".join(config)
+
+def deploy_config_to_gns3(router_name, config, gns3_host, gns3_port):
+    tn = telnetlib.Telnet(gns3_host, gns3_port)
+    tn.write(b"enable\n")
+    tn.write(b"configure terminal\n")
+    tn.write(config.encode('ascii'))
+    tn.write(b"end\n")
+    tn.write(b"write memory\n")
+    tn.close()
 
 def main():
     with open('config.json', 'r') as f:
         data = json.load(f)
 
+    gns3_host = "localhost"
+    gns3_port = 8000
+
     for as_name, as_config in data.items():
         for router in as_config['routers']:
             config = generate_config(router, as_config)
-            with open(f"{router['name']}_config.txt", 'w') as f:
-                f.write(config)
+            deploy_config_to_gns3(router['name'], config, gns3_host, gns3_port)
 
 if __name__ == "__main__":
     main()
