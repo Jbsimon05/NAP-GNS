@@ -2,7 +2,7 @@ from gns3fy import Gns3Connector, Project, Node
 
 # Constants for GNS3 server
 GNS3_SERVER_URL = "http://localhost:3080"  # URL de l'instance GNS3
-PROJECT_NAME = "Network_Automation_Project"
+PROJECT_NAME = "GNS_v0"
 
 # Addressing and configuration data
 ADDRESS_PLAN = {
