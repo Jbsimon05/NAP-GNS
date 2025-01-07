@@ -1,30 +1,26 @@
 # NAP-GNS
 3TC semestre 1 - Network Automation Project sous GNS
 
-## Project Overview
-
 This project automates the configuration of network devices in a multi-AS (Autonomous System) topology using JSON-based intents and Python scripts. The network includes three ASes with distinct routing protocols (RIP and OSPF) and interconnectivity using BGP.
 
-Project Structure
+**Project Structure** - Address Plan
 
-Address Plan
+- AS X
 
-AS X
+  Loopback Range: 10.1.1.0/24
 
-Loopback Range: 10.1.1.0/24
+  Physical Range: 192.168.1.0/24
 
-Physical Range: 192.168.1.0/24
+  Routing Protocol: RIP
 
-Routing Protocol: RIP
+- AS Y
 
-AS Y
+  Loopback Range: 10.2.1.0/24
 
-Loopback Range: 10.2.1.0/24
+  Physical Range: 192.168.2.0/24
 
-Physical Range: 192.168.2.0/24
+  Routing Protocol: OSPF
 
-Routing Protocol: OSPF
+- Inter-AS Connectivity
 
-Inter-AS Connectivity
-
-AS X to AS Y: eBGP
+  AS X to AS Y: eBGP
