@@ -1,0 +1,72 @@
+{
+  "AS_X": {
+    "IGP": "RIP",
+    "loopback_range": "2001:db8:1::/64",
+    "physical_range": "2001:db8:2::/64",
+    "routers": [
+      {
+        "name": "R1",
+        "interfaces": [
+          { "name": "GigabitEthernet0/0", "ip": "2001:db8:2::1/64" },
+          { "name": "GigabitEthernet0/1", "ip": "2001:db8:2::2/64" }
+        ],
+        "loopback": "2001:db8:1::1/64",
+        "bgp": {
+          "asn": 65001,
+          "neighbors": [
+            { "ip": "2001:db8:2::2", "remote_as": 65002 }
+          ]
+        }
+      },
+      {
+        "name": "R2",
+        "interfaces": [
+          { "name": "GigabitEthernet0/0", "ip": "2001:db8:2::3/64" },
+          { "name": "GigabitEthernet0/1", "ip": "2001:db8:2::4/64" }
+        ],
+        "loopback": "2001:db8:1::2/64",
+        "bgp": {
+          "asn": 65001,
+          "neighbors": [
+            { "ip": "2001:db8:2::1", "remote_as": 65002 }
+          ]
+        }
+      }
+    ]
+  },
+  "AS_Y": {
+    "IGP": "OSPF",
+    "loopback_range": "2001:db8:3::/64",
+    "physical_range": "2001:db8:4::/64",
+    "routers": [
+      {
+        "name": "R3",
+        "interfaces": [
+          { "name": "GigabitEthernet0/0", "ip": "2001:db8:4::1/64" },
+          { "name": "GigabitEthernet0/1", "ip": "2001:db8:4::2/64" }
+        ],
+        "loopback": "2001:db8:3::1/64",
+        "bgp": {
+          "asn": 65002,
+          "neighbors": [
+            { "ip": "2001:db8:4::2", "remote_as": 65001 }
+          ]
+        }
+      },
+      {
+        "name": "R4",
+        "interfaces": [
+          { "name": "GigabitEthernet0/0", "ip": "2001:db8:4::3/64" },
+          { "name": "GigabitEthernet0/1", "ip": "2001:db8:4::4/64" }
+        ],
+        "loopback": "2001:db8:3::2/64",
+        "bgp": {
+          "asn": 65002,
+          "neighbors": [
+            { "ip": "2001:db8:4::1", "remote_as": 65001 }
+          ]
+        }
+      }
+    ]
+  }
+}
