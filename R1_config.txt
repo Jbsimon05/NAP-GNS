@@ -1,0 +1,19 @@
+enable
+configure terminal
+interface g1/0
+ipv6 address 2001:db8:1::1/64
+ipv6 enable
+exit
+interface g2/0
+ipv6 address 2001:db8:3::1/64
+ipv6 enable
+exit
+ipv6 router rip GNS3
+interface g1/0
+ipv6 rip GNS3 enable
+exit
+interface g2/0
+ipv6 rip GNS3 enable
+exit
+write memory
+exit
