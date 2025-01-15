@@ -279,7 +279,6 @@ def create_networks(as_topology, router, subnet_dict, index_line):
                 insert_cfg_line(router, index_line, f"  network {as_topology['address']}{subnet_dict[network[0][0], network[0][1]]}::{as_topology['subnet_mask']}\n" )
                 
                     
-
 def create_loopback_interface(router, as_topology):
     index_line = find_index(router, line="ip tcp synwait-time 5\n")
     insert_cfg_line(router, index_line, f"interface Loopback0\n no ip address\n ipv6 address 2001::{router[1:]}/128\n")
