@@ -10,7 +10,7 @@
         }
       },
       "neighbor": {},
-      "address": "2001:db8:1::",
+      "address": "2001:db8:1",
       "subnet_mask": "/64"
     }
   }
