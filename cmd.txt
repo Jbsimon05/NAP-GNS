@@ -1,0 +1,12 @@
+Router> enable
+Router# configure terminal
+Router(config)# ipv6 unicast-routing
+Router(config)# end
+Router#
+Router# configure terminal
+Router(config)# interface name number
+Router(config-if)# ipv6 enable
+Router(config-if)# ipv6 address ipv6-address/prefix-length
+Router(config-if)# no shutdown
+Router#
+Router# show ipv6 interface
