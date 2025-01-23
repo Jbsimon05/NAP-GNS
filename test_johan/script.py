@@ -119,6 +119,7 @@ def last_entries_subnet(subnet_dict):
     for AS in subnet_dict:
         last_entry[AS] = list(subnet_dict[AS].values())[-1]
     return last_entry
+
 def give_subnet_interconnexion(as_topology, subnet_dict):  # Crée le tableau des subnets des interconnexion entre AS pour tout le json
     subnet_interconnexion_dict = dict()
     last_entries = last_entries_subnet(subnet_dict)
@@ -289,7 +290,7 @@ def create_loopback_interface(router, as_topology):
 
 if __name__ == "__main__":
     start = time.time()
-    with open("intends.json", 'r') as file:
+    with open("new_intends.json", 'r') as file:
         topology = json.load(file)
     main(topology)
     end = time.time()
