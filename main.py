@@ -1,102 +1,54 @@
 import json
-import paramiko
-import socket
+import time
 
-def generate_config(router, as_config):
-    config = []
-    config.append(f"hostname {router['name']}")
-    config.append("!")
+from addresses import create_base_cfg, create_loopback_interface, give_subnet_number, create_interfaces
 
-    # Loopback interface
-    config.append(f"interface Loopback0")
-    config.append(f" ipv6 address {router['loopback']}")
-    config.append("!")
 
-    # Physical interfaces
-    for interface in router['interfaces']:
-        config.append(f"interface {interface['name']}")
-        config.append(f" ipv6 address {interface['ip']}")
-        config.append(" no shutdown")
-        config.append("!")
+base_config = [
+    "version 15.2",
+    "service timestamps debug datetime msec",
+    "service timestamps log datetime msec",
+    "boot-start-marker",
+    "boot-end-marker",
+    "no aaa new-model",
+    "no ip icmp rate-limit unreachable",
+    "ip cef",
+    "no ip domain lookup",
+    "ipv6 unicast-routing",
+    "ipv6 cef",
+    "multilink bundle-name authenticated",
+    "ip tcp synwait-time 5",
+    "ip forward-protocol nd",
+    "no ip http server",
+    "no ip http secure-server",
+    "control-plane",
+    "line con 0",
+    " exec-timeout 0 0",
+    " privilege level 15",
+    " logging synchronous",
+    " stopbits 1",
+    "line aux 0",
+    " exec-timeout 0 0",
+    " privilege level 15",
+    " logging synchronous",
+    " stopbits 1",
+    "line vty 0 4",
+    " login",
+    "end"
+]
 
-    # IGP configuration
-    if as_config['IGP'] == "RIP":
-        config.append("ipv6 unicast-routing")
-        config.append("ipv6 router rip NAME_OF_PROCESS")
-        for interface in router['interfaces']:
-            config.append(f" network {interface['ip'].split('/')[0]}")
-        config.append("!")
-    elif as_config['IGP'] == "OSPF":
-        config.append("ipv6 unicast-routing")
-        config.append("ipv6 router ospf 1")
-        config.append(" router-id 1.1.1.1")
-        for interface in router['interfaces']:
-            config.append(f" interface {interface['name']}")
-            config.append("  area 0")
-        config.append("!")
 
-    # BGP configuration
-    config.append(f"router bgp {router['bgp']['asn']}")
-    config.append(" bgp log-neighbor-changes")
-    for neighbor in router['bgp']['neighbors']:
-        config.append(f" neighbor {neighbor['ip'].split('/')[0]} remote-as {neighbor['remote_as']}")
-    config.append("!")
+def main(topology) :
+    for AS in topology :
+        for router in topology[AS]['routers'] :
+            create_base_cfg(router, base_config)
+            create_loopback_interface(router)
+            create_interfaces(router, topology)
 
-    return "\n".join(config)
-
-def deploy_config_to_gns3(router_name, config, hostname, port, username, password):
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(hostname, port=port, username=username, password=password, look_for_keys=False, allow_agent=False)
-
-        # Enter enable mode
-        stdin, stdout, stderr = ssh.exec_command("enable")
-        stdout.channel.recv_exit_status()
-
-        # Enter global configuration mode
-        stdin, stdout, stderr = ssh.exec_command("configure terminal")
-        stdout.channel.recv_exit_status()
-
-        # Apply configuration
-        commands = config.split("\n")
-        for command in commands:
-            stdin, stdout, stderr = ssh.exec_command(command)
-            stdout.channel.recv_exit_status()
-
-        # Exit configuration mode and save
-        stdin, stdout, stderr = ssh.exec_command("end")
-        stdout.channel.recv_exit_status()
-        stdin, stdout, stderr = ssh.exec_command("write memory")
-        stdout.channel.recv_exit_status()
-
-        ssh.close()
-        print(f"Configuration deployed successfully for {router_name}")
-
-    except paramiko.ssh_exception.NoValidConnectionsError as e:
-        print(f"Unable to connect to {hostname} on port {port}: {e}")
-    except paramiko.ssh_exception.AuthenticationException as e:
-        print(f"Authentication failed for {hostname}: {e}")
-    except paramiko.ssh_exception.SSHException as e:
-        print(f"SSH error occurred: {e}")
-    except socket.error as e:
-        print(f"Socket error occurred: {e}")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-def main():
-    with open('config.json', 'r') as f:
-        data = json.load(f)
-
-    gns3_host = "::1"  # Utilisation de l'adresse IPv6 localhost
-    gns3_port = 3080
-    gns3_username = "admin"
-    gns3_password = "admin"
-
-    for as_name, as_config in data.items():
-        for router in as_config['routers']:
-            config = generate_config(router, as_config)
-            deploy_config_to_gns3(router['name'], config, gns3_host, gns3_port, gns3_username, gns3_password)
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__" :
+    start = time.time()
+    with open("new_intends.sjon", 'r') as file :
+        topology = json.load(file)
+    main(topology)
+    end = time.time()
+    print("Execution time : ", end-start)
