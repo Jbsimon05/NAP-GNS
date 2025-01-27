@@ -12,8 +12,7 @@
             "R7" : {"R4" : "FastEthernet0/0", "R5" : "GigabitEthernet2/0"}
         },
         "protocol" : "RIP",
-        "neighbor" : {"AS_2" : {"R6" : {"R8":"GigabitEthernet3/0"}, "R7" : {"R9":"GigabitEthernet3/0"}}},
-        "pingable" : { "AS_2": [["R1","R2"]] }
+        "neighbor" : {"AS_2" : {"R6" : {"R8":"GigabitEthernet3/0"}, "R7" : {"R9":"GigabitEthernet3/0"}}}
     },
     "AS_2": {
         "address" : "2001:192:168:2",
@@ -28,8 +27,7 @@
             "R14" : {"R12" : "GigabitEthernet1/0", "R13" : "GigabitEthernet2/0"}
         },
         "protocol" : "OSPF",
-        "neighbor" : {"AS_1" : {"R8" : {"R6":"GigabitEthernet3/0"}, "R9" : {"R7": "GigabitEthernet3/0"}}},
-        "pingable" : {"AS_1": [["R13","R14"]]}
+        "neighbor" : {"AS_1" : {"R8" : {"R6":"GigabitEthernet3/0"}, "R9" : {"R7": "GigabitEthernet3/0"}}}
     }
     
 }

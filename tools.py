@@ -25,3 +25,17 @@ def find_index(router : str, line : str) -> int :
             lines = file.readline()
             current_index += 1
     return current_index
+
+
+
+
+def is_border_router(routeur : str, topology : dict, AS : str) -> bool :
+    """
+    Return True if a given routeur is a border router of his AS
+    """
+    state = False
+    for AS in topology :
+        for AS_neighbor in topology[AS]['neighbor'] : 
+            if routeur in topology[AS]['neighbor'][AS_neighbor].keys() :
+                state = True 
+    return state

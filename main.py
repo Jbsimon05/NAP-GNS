@@ -3,7 +3,7 @@ import time
 import subprocess
 
 from addresses import create_base_cfg, create_loopback_interface, create_interfaces
-# from protocols import activate_protocols
+from protocols import activate_protocols
 
 base_config = [
     "version 15.2",
@@ -52,7 +52,7 @@ def main(topology) :
             create_interfaces(router, topology, AS)
 
             # Activates RIP or OSPF on the router (soon BGP)
-            # activate_protocols(AS, router, topology)
+            #activate_protocols(AS, router, topology)
 
 
 if __name__ == "__main__":
