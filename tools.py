@@ -3,11 +3,11 @@ def insert_line(router : str, index_line : int, data : str) -> None :
     For a given router, insert the data at indexline in its config file
     """
     # Get the lines in the file and insert the new one
-    with open(f"i{router[1::]}_startup_config.cfg", 'r') as file :
+    with open(f"i{router[1:]}_startup-config.cfg", 'r') as file :
         lines = file.readlines()
         lines.insert(index_line, data)
     # Writes the updated list in the file
-    with open(f"i{router[1::]}_startup_config.cfg", 'w') as file :
+    with open(f"i{router[1::]}_startup-config.cfg", 'w') as file :
         file.writelines(lines)
 
 

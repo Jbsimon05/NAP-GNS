@@ -2,16 +2,16 @@ import os
 import shutil
 import time
 
-def get_number_file(nom_fichier):
+def get_number_file(nom_fichier, correct_files):
     if nom_fichier in correct_files:
         return int(nom_fichier[1:2])
     else:
         return None
 
-def compare_and_paste(dossier_source, dossier_destination):
+def compare_and_paste(dossier_source, dossier_destination, correct_files):
     noms_fichiers = os.listdir(os.path.join(os.getcwd(), dossier_destination))
     for nom_fichier in noms_fichiers:
-        numero_fichier = get_number_file(nom_fichier)
+        numero_fichier = get_number_file(nom_fichier, correct_files)
         print(nom_fichier, numero_fichier)
         if numero_fichier is not None:
             chemin_fichier_source = os.path.join(dossier_source, nom_fichier)
@@ -27,20 +27,15 @@ def compare_and_paste(dossier_source, dossier_destination):
             except PermissionError:
                 print(f"Vous n'avez pas la permission de déplacer le fichier {nom_fichier}.")
 
+def move_files() : 
+    path_correct_files = os.path.join(os.getcwd())
+    correct_files = os.listdir(path_correct_files)
 
-start = time.time()
+    # Dossier GNS3
+    path_dossier_principal = r'C:\Users\User\GNS3\projects\quatorze_routeurs\project-files\dynamips'
+    dossiers = os.listdir(path_dossier_principal)
 
-path_correct_files = os.path.join(os.getcwd())
-correct_files = os.listdir(path_correct_files)
-
-# Dossier GNS3
-path_dossier_principal = r"C:\Users\User\GNS3\projects\quatorze_routeurs\project-files\dynamips"
-dossiers = os.listdir(path_dossier_principal)
-
-for nom_dossier in dossiers:
-    path_dossier_destination = os.path.join(path_dossier_principal, nom_dossier, "configs")
-    if os.path.exists(path_dossier_destination):
-        compare_and_paste(path_correct_files, path_dossier_destination)
-
-end = time.time()
-print("temps d'execution :", end-start)
+    for nom_dossier in dossiers:
+        path_dossier_destination = os.path.join(path_dossier_principal, nom_dossier, "configs")
+        if os.path.exists(path_dossier_destination):
+            compare_and_paste(path_correct_files, path_dossier_destination, correct_files)

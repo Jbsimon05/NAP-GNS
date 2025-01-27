@@ -1,7 +1,10 @@
 import json
 import time
+import os
 
-from addresses import create_base_cfg, create_loopback_interface, give_subnet_number, create_interfaces
+from addresses import create_base_cfg, create_loopback_interface, create_interfaces
+# from protocols import activate_protocols
+from move_files import move_files
 
 
 base_config = [
@@ -41,13 +44,24 @@ base_config = [
 def main(topology) :
     for AS in topology :
         for router in topology[AS]['routers'] :
-            create_base_cfg(router, base_config)
+            # Creates the basic config file
+            create_base_cfg(base_config, router)
+
+            # Creates the loopback interfaces in the config file
             create_loopback_interface(router)
-            create_interfaces(router, topology)
+
+            # Creates the IP addresses on the intefaces of the routers
+            create_interfaces(router, topology, AS)
+
+            # Activates RIP or OSPF on the router (soon BGP)
+            # activate_protocols(AS, router, topology)
+
+
+    move_files()
 
 if __name__ == "__main__" :
     start = time.time()
-    with open("new_intends.sjon", 'r') as file :
+    with open("new_intends.json", 'r') as file :
         topology = json.load(file)
     main(topology)
     end = time.time()

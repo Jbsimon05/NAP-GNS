@@ -53,7 +53,7 @@ def give_subnet_number(topology : dict) -> dict :
 
 
 
-def create_interfaces(router : str, topology : dict, ) -> None :
+def create_interfaces(router : str, topology : dict, AS : str) -> None :
     """
     Generate the interfaces with the correct IPv6 addresses for each routrer of each AS 
     
@@ -71,21 +71,21 @@ def create_interfaces(router : str, topology : dict, ) -> None :
     index_line = find_index(router, line="ip tcp synwait-time 5\n")
 
     #Iterate over ...
-    for neighbor in topology['routers'][router].keys() :
+    for neighbor in topology[AS]['routers'][router].keys() :
         # To ensure it's in the correct order
         if router[1:] < neighbor[1:] :
-            subnet_index = subnet_dict[(router, neighbor)]
+            subnet_index = subnet_dict[AS][(router, neighbor)]
             router_index = 1
         else :
-            subnet_index = subnet_dict[(neighbor, router)]
+            subnet_index = subnet_dict[AS][(neighbor, router)]
             router_index = 2
         
         #Insert the lines in the config files
         insert_line(router, index_line,
-            f"interface {topology['routers'][router][neighbor]}\n"  # Interface name
+            f"interface {topology[AS]['routers'][router][neighbor]}\n"  # Interface name
             f" no ip address\n"  # Disable IPv4 addressing
             f" negotiation auto\n"  # Enable automatic negotiation for the interface
-            f" ipv6 address {topology['address']}{subnet_index}::{router_index}{topology['subnet_mask']}\n"  # Assign an IPv6 address
+            f" ipv6 address {topology[AS]['address']}{subnet_index}::{router_index}{topology[AS]['subnet_mask']}\n"  # Assign an IPv6 address
             f" ipv6 enable\n"  # Enable IPv6 on the interface
         )
 
