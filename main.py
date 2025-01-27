@@ -1,11 +1,9 @@
 import json
 import time
-import os
+import subprocess
 
 from addresses import create_base_cfg, create_loopback_interface, create_interfaces
 # from protocols import activate_protocols
-from move_files import move_files
-
 
 base_config = [
     "version 15.2",
@@ -57,12 +55,15 @@ def main(topology) :
             # activate_protocols(AS, router, topology)
 
 
-    move_files()
+if __name__ == "__main__":
 
-if __name__ == "__main__" :
-    start = time.time()
-    with open("new_intends.json", 'r') as file :
+    with open("new_intends.json", "r") as file:
         topology = json.load(file)
+
+    start = time.time()
     main(topology)
+
     end = time.time()
-    print("Execution time : ", end-start)
+    print("Temps d'exécution total :", end - start)
+
+# To move the files launch the notebook

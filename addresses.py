@@ -24,7 +24,7 @@ def create_loopback_interface(router : str) -> None :
     # Finds the index of where to insert the loopback part
     index_line = find_index(router, "ip tcp synwait-time 5\n")
     #Insert the loopback part 
-    insert_line(router, index_line, f"interface Loopback0\n no ip address\n ipv6 address 2001::{router[1:]}/128\n")
+    insert_line(router, index_line, f"interface Loopback0\n no ip address\n ipv6 address 2001::{router[1:]}/128\n ipv6 enable\n")
 
 
 
