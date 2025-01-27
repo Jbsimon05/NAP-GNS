@@ -1,6 +1,5 @@
 import json
 import time
-import subprocess
 
 from addresses import create_base_cfg, create_loopback_interface, create_interfaces
 from protocols import activate_protocols

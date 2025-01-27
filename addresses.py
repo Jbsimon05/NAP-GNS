@@ -1,4 +1,4 @@
-from tools import insert_line, find_index
+from tools import insert_line, find_index, is_border_router, give_subnet_number, give_subnet_interconnexion, get_subnet_interconnexion
 
 def create_base_cfg(base_config : list, router : str) -> None :
     """
@@ -29,58 +29,35 @@ def create_loopback_interface(router : str) -> None :
 
 
 
-def give_subnet_number(topology : dict) -> dict :
-    """ 
-    Creates a dict associating a unique number to every physical link in the network
 
-    Exemaple : {'AS_1': {('R1', 'R2'): 1, ('R1', 'R3'): 2, ... }
+def create_interfaces(router: str, topology: dict, AS: str) -> None:
     """
-    subnet_dict = {}
-    # Iterate over each AS
-    for AS in topology :
-        subnet_dict[AS] = {}
-        subnet_number = 1
-        # Iterate over each router of the current AS
-        for router in topology[AS]['routers'] :
-            # Iterate over each neighbor of the current router
-            for neighbor in topology[AS]['routers'][router] :
-                # To avoid duplicates, ensure the router with the smaller numeric suffix comes first
-                if router[1:] < neighbor[1:] :
-                    subnet_dict[AS][(router, neighbor)] = subnet_number
-                    subnet_number += 1
-    return subnet_dict
-
-
-
-
-def create_interfaces(router : str, topology : dict, AS : str) -> None :
-    """
-    Generate the interfaces with the correct IPv6 addresses for each routrer of each AS 
+    Generate the interfaces with the correct IPv6 addresses for each router of each AS 
     
-    Exemaple : 
+    Example: 
         interface GigabitEthernet1/0
         no ip address
         negotiation auto
         ipv6 address 2001:192:168:11::1/64
         ipv6 enable
     """
-    #Creates the subnet_dict
+    # Creates the subnet_dict
     subnet_dict = give_subnet_number(topology)
 
-    #Finds the line where to insert the interface
+    # Finds the line where to insert the interface
     index_line = find_index(router, line="ip tcp synwait-time 5\n")
 
-    #Iterate over ...
-    for neighbor in topology[AS]['routers'][router].keys() :
+    # Iterate over each neighbor in the AS topology
+    for neighbor in topology[AS]['routers'][router].keys():
         # To ensure it's in the correct order
-        if router[1:] < neighbor[1:] :
+        if router[1:] < neighbor[1:]:
             subnet_index = subnet_dict[AS][(router, neighbor)]
             router_index = 1
-        else :
+        else:
             subnet_index = subnet_dict[AS][(neighbor, router)]
             router_index = 2
         
-        #Insert the lines in the config files
+        # Insert the lines in the config files for the interface
         insert_line(router, index_line,
             f"interface {topology[AS]['routers'][router][neighbor]}\n"  # Interface name
             f" no ip address\n"  # Disable IPv4 addressing
@@ -91,3 +68,22 @@ def create_interfaces(router : str, topology : dict, AS : str) -> None :
 
         # Increment the index line to ensure the next configuration is inserted at the correct position
         index_line += 5
+    
+    
+    if is_border_router(router, topology, AS):
+
+        index_line = find_index(router, "ip forward-protocol nd\n") - 1
+        subnet_interconnexion_dict = give_subnet_interconnexion(topology, subnet_dict)
+
+        for AS_neighbor in topology[AS]["neighbor"]:
+            for neighborRouter in topology[AS]["neighbor"][AS_neighbor]:
+                if neighborRouter == router:
+                    for neighborRouter2 in topology[AS]["neighbor"][AS_neighbor][neighborRouter]:
+                        insert_line(router, index_line,
+                                        f"interface {topology[AS]['neighbor'][AS_neighbor][neighborRouter][neighborRouter2]}\n"
+                                        f" no ip address\n"
+                                        f" negotiation auto\n" 
+                                        f" ipv6 address {topology[AS]['address'][:-1]}{get_subnet_interconnexion(AS, subnet_interconnexion_dict, router, neighborRouter2)}{topology[AS]['subnet_mask']}\n" 
+                                        f" ipv6 enable\n"
+                                        )
+                        index_line += 5
