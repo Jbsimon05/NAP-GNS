@@ -51,7 +51,7 @@ def main(topology) :
             create_interfaces(router, topology, AS)
 
             # Activates RIP or OSPF on the router (soon BGP)
-            #activate_protocols(AS, router, topology)
+            activate_protocols(AS, router, topology)
 
 
 if __name__ == "__main__":
