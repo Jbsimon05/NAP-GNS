@@ -1,0 +1,135 @@
+V1 : Ne marche pas
+
+Pour R_X dans AS_1 (RIP) : 
+
+conf t
+router bgp 100
+no bgp default ipv4-unicast
+bgp router-id X.X.X.X
+neighbor 2001:192:168:111::2 remote-as 200
+neighbor 2001:192:168:112::2 remote-as 200
+address-family ipv6 unicast
+network 2001:192:168:1::/64
+neighbor 2001:192:168:111::2 activate
+neighbor 2001:192:168:112::2 activate
+exit
+redistribute rip
+exit 
+exit
+write memory
+
+
+Pour R_Y dans AS_2 (OSPF) :
+
+conf t
+router bgp 200
+bgp router-id Y.Y.Y.Y
+neighbor 2001:192:168:111::1 remote-as 100
+neighbor 2001:192:168:112::1 remote-as 100
+address-family ipv6
+network 2001:192:168:2::/64
+exit
+redistribute ospf 1
+exit 
+exit
+write memory
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+V2 : Ne marche pas
+
+For R_X in AS_1 :
+
+conf t
+router bgp 100
+no bgp default ipv4-unicast
+bgp router-id X.X.X.X
+neighbor 2001:192:168:111::2 remote-as 200
+neighbor 2001:192:168:112::2 remote-as 200
+address-family ipv6 unicast
+neighbor 2001:192:168:111::2 activate
+neighbor 2001:192:168:112::2 activate
+network 2001:192:168:1::/64
+end 
+write memory
+
+
+For R_Y in AS_2 :
+
+conf t
+router bgp 200
+no bgp default ipv4-unicast
+bgp router-id Y.Y.Y.Y
+neighbor 2001:192:168:111::1 remote-as 100
+neighbor 2001:192:168:112::1 remote-as 100
+address-family ipv6 unicast
+neighbor 2001:192:168:111::1 activate
+neighbor 2001:192:168:112::1 activate
+network 2001:192:168:2::/64
+end
+write memory
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
