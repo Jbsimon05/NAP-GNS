@@ -11,7 +11,6 @@ def insert_line(router : str, index_line : int, data : str) -> None :
         file.writelines(lines)
 
 
-
 def find_index(router : str, line : str) -> int :
     """ 
     For a given router, finds the index of a given line in its config file
@@ -24,7 +23,6 @@ def find_index(router : str, line : str) -> int :
             l = file.readline()
             current_index += 1
     return current_index
-
 
 
 def give_subnet_dict(topology : dict) -> dict :
@@ -49,10 +47,9 @@ def give_subnet_dict(topology : dict) -> dict :
     return subnet_dict
 
 
-
 def is_border_router(routeur : str, topology : dict, AS : str) -> bool :
     """
-    Return True if a given routeur is a border router of his AS
+    Return whether a given routeur is a border router of his AS
     """
     state = False
     for AS in topology :
@@ -60,8 +57,6 @@ def is_border_router(routeur : str, topology : dict, AS : str) -> bool :
             if routeur in topology[AS]['neighbor'][AS_neighbor].keys() :
                 state = True 
     return state
-
-
 
 
 def last_entries_subnet(subnet_dict : dict) -> int :
@@ -74,22 +69,27 @@ def last_entries_subnet(subnet_dict : dict) -> int :
     return last_entry
 
 
-
-
 def give_subnet_interconnexion(topology : dict, subnet_dict : dict) -> dict :
     """
     Generates a dict of subnets for the inter-AS connexions
     """
+    # Create necessary dict
     subnet_interconnexion_dict = dict()
     last_entries = last_entries_subnet(subnet_dict)
     for AS in topology:
         subnet_interconnexion_dict[AS] = dict()
-
+    
+    # Iterate over each AS
     for AS in topology:
+        # Iterate over each AS neighbor
         for AS_neighbor in topology[AS]['neighbor']:
+            # Iterate over each border Router
             for router1 in topology[AS]['neighbor'][AS_neighbor]:
+                # Iterate over each neighbor Router
                 for router2 in topology[AS]['neighbor'][AS_neighbor][router1]:
+                    # Check externality of the link
                     if (router1, router2) not in subnet_interconnexion_dict[AS].keys() and (router2, router1) not in subnet_interconnexion_dict[AS].keys():
+                        # Create the end of the address of each externnal interface of borderRouters (ex. 111::1 -> AS 1, link 11, router 1)
                         if AS < AS_neighbor:
                             subnet_interconnexion_dict[AS][(router1, router2)] = str(int(AS[3:])) + str((last_entries[AS] + 1)) + "::1"
                             subnet_interconnexion_dict[AS_neighbor][(router2, router1)] = str(int(AS[3:])) + str((last_entries[AS] + 1)) + "::2"
@@ -98,8 +98,6 @@ def give_subnet_interconnexion(topology : dict, subnet_dict : dict) -> dict :
                             subnet_interconnexion_dict[AS_neighbor][(router2, router1)] = str(int(AS_neighbor[3:])) + str((last_entries[AS] + 1)) + "::2"
                         last_entries[AS] += 1
     return subnet_interconnexion_dict
-
-
 
 
 def get_subnet_interconnexion(AS : str, subnet_interconnexion_dict : dict, routeur1 : str, routeur2 : str) -> str :

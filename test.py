@@ -1,10 +1,10 @@
 import json
 from tools import *
 
-with open("new_intends.json", "r") as file:
+with open("intends.json", "r") as file:
     topology = json.load(file)
 
-subnet_dict = give_subnet_number(topology)
+subnet_dict = give_subnet_dict(topology)
 print(subnet_dict)
 
 print("\n")
@@ -16,9 +16,7 @@ print("\n")
 
 for AS in topology :
     for router in topology[AS]['routers'] :
-        
         if is_border_router(router, topology, AS):
-    
             for AS_neighbor in topology[AS]["neighbor"]:
                 for neighborRouter in topology[AS]["neighbor"][AS_neighbor]:
                     if neighborRouter == router:

@@ -68,7 +68,7 @@ def create_interfaces(router: str, topology: dict, AS: str) -> None:
     if is_border_router(router, topology, AS):
         index_line = find_index(router, "ip forward-protocol nd\n") - 1
         subnet_interconnexion_dict = give_subnet_interconnexion(topology, subnet_dict)
-        # Iterate over each AS neighbor of the router
+        # Iterate over each AS neighbor
         for AS_neighbor in topology[AS]["neighbor"]:
             # Iterate over each border Router
             for borderRouter in topology[AS]["neighbor"][AS_neighbor]:                              # topo -> "neighbor" part -> neighbor AS -> router from working AS
