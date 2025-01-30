@@ -17,7 +17,6 @@ def create_base_cfg(base_config : list, router : str) -> None :
     insert_line(router, 3, f"hostname {router}\n")   
 
 
-
 def create_loopback_interface(router : str) -> None :
     """ 
     Insert the loopback lines at the right place in the config file of a given router
@@ -26,7 +25,6 @@ def create_loopback_interface(router : str) -> None :
     index_line = find_index(router, "ip tcp synwait-time 5\n")
     #Insert the loopback part 
     insert_line(router, index_line, f"interface Loopback0\n no ip address\n ipv6 address 2001::{router[1:]}/128\n ipv6 enable\n")
-
 
 
 def create_interfaces(router: str, topology: dict, AS: str) -> None:

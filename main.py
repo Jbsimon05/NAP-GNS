@@ -4,6 +4,8 @@ import time
 from addresses import create_base_cfg, create_loopback_interface, create_interfaces
 from protocols import activate_protocols
 
+
+
 base_config = [
     "version 15.2",
     "service timestamps debug datetime msec",
@@ -37,6 +39,8 @@ base_config = [
     "end"
 ]
 
+
+
 def main(topology) :
     for AS in topology :
         for router in topology[AS]['routers'] :
@@ -51,6 +55,8 @@ def main(topology) :
 
             # RIP + OSPF + BGP
             activate_protocols(AS, router, topology)
+
+
 
 if __name__ == "__main__":
     with open("intends.json", "r") as file:
