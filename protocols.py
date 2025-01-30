@@ -1,9 +1,11 @@
 from tools import insert_line, find_index, is_border_router
 
+
+
 def activate_protocols(AS : str, router : str, topology : dict) -> None :
     """ 
     For a given router, activate RIP or OSPF
-    Then activate BGP
+    Then activate BGP (hopefully)
     """
     # Creation of a router ID (unique for each router)
     router_ID = give_ID(router)
