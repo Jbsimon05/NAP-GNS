@@ -87,11 +87,9 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
     if is_border_router(router, topology, AS) :
         index_line = find_index(router, "ip forward-protocol nd\n")
         insert_line(router, index_line, "router ospf 1\n")
-        """
         index_line = find_index(router, f" router-id {router_ID}\n")
         for AS_neighbor in topology[AS]["neighbor"]:
             if router in topology[AS]["neighbor"][AS_neighbor].keys():
                 for interface in topology[AS]["neighbor"][AS_neighbor][router].values():
                     insert_line(router, index_line, f" passive-interface {interface}\n")
-        """
                     
