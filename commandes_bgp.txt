@@ -92,21 +92,22 @@ write memory
 
 
 
+Configurer eBGP entre des routeurs :
 
+Sur R6 :
+conf t
+router bgp 100
+no bgp default ipv4-unicast
+bgp router-id 6.6.6.6
+neighbor 2001:192:168:111::2 remote-as 200
+address-family ipv6 unicast
+neighbor 2001:192:168:111::2 activate
+redistribute rip
+no synchronization
+end
+write
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+Adapter les adresses, les numéros d'AS et les protocoles aux autres routeurs de bordure
 
 
 
