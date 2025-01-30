@@ -15,7 +15,7 @@ def activate_protocols(AS : str, router : str, topology : dict) -> None :
         activate_rip(router, topology, AS)
     elif is_ospf(topology, AS) :
         activate_ospf(router, topology, AS, router_ID)
-
+    
     # Activate BGP
     #activate_bgp(...)
 
@@ -47,7 +47,7 @@ def activate_rip(router : str, topology : dict, AS : str) -> None :
     # Enabling RIP
     index_line = find_index(router, "no ip http secure-server\n")
     insert_line(router, index_line, f"ipv6 router rip process\n redistribute connected\n")
-
+    
     # Activates RIP on all the interfaces
     for interface in topology[AS]['routers'][router].values() :
         index_line = find_index(router, f"interface {interface}\n") + 4
@@ -73,7 +73,7 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
     for interface in topology[AS]['routers'][router].values():
         index_line = find_index(router, f"interface {interface}\n") + 4
         insert_line(router, index_line, f" ipv6 ospf 1 area 0\n")
-
+    
     # If the router is a border router on an interface : make this interface passive to avoid packet pollution
     if is_border_router(router, topology, AS) :
         index_line = find_index(router, "ip forward-protocol nd\n")
