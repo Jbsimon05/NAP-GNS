@@ -12,7 +12,6 @@ def insert_line(router : str, index_line : int, data : str) -> None :
 
 
 
-
 def find_index(router : str, line : str) -> int :
     """ 
     For a given router, finds the index of a given line in its config file
@@ -20,20 +19,19 @@ def find_index(router : str, line : str) -> int :
     current_index = 1
     with open(f'i{router[1:]}_startup-config.cfg', 'r') as file:
         # Browses the lines to find the wanted one
-        lines = file.readline()
-        while lines != line:
-            lines = file.readline()
+        l = file.readline()
+        while l != line:
+            l = file.readline()
             current_index += 1
     return current_index
 
 
 
-
-def give_subnet_number(topology : dict) -> dict :
+def give_subnet_dict(topology : dict) -> dict :
     """ 
     Creates a dict associating a unique number to every physical link in the network
 
-    Exemaple : {'AS_1': {('R1', 'R2'): 1, ('R1', 'R3'): 2, ... }
+    Example : {'AS_1': {('R1', 'R2'): 1, ('R1', 'R3'): 2, ... }
     """
     subnet_dict = {}
     # Iterate over each AS
@@ -49,7 +47,6 @@ def give_subnet_number(topology : dict) -> dict :
                     subnet_dict[AS][(router, neighbor)] = subnet_number
                     subnet_number += 1
     return subnet_dict
-
 
 
 

@@ -37,32 +37,28 @@ base_config = [
     "end"
 ]
 
-
 def main(topology) :
     for AS in topology :
         for router in topology[AS]['routers'] :
-            # Creates the basic config file
+            # config file vierge
             create_base_cfg(base_config, router)
 
-            # Creates the loopback interfaces in the config file
+            # interfaces Loopback0
             create_loopback_interface(router)
 
-            # Creates the IP addresses on the intefaces of the routers
+            # adressage ipv6
             create_interfaces(router, topology, AS)
 
-            # Activates RIP or OSPF on the router (soon BGP)
+            # RIP + OSPF + BGP
             activate_protocols(AS, router, topology)
 
-
 if __name__ == "__main__":
-
-    with open("new_intends.json", "r") as file:
+    with open("intends.json", "r") as file:
+        #var topo à partir de json
         topology = json.load(file)
-
     start = time.time()
     main(topology)
-
     end = time.time()
     print("Temps d'exécution total :", end - start)
 
-# To move the files launch the notebook
+# exécuter move_files en changeant le chemin d'accès

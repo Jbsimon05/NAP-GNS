@@ -1,4 +1,6 @@
-from tools import insert_line, find_index, is_border_router, give_subnet_number, give_subnet_interconnexion, get_subnet_interconnexion
+from tools import insert_line, find_index, is_border_router, give_subnet_dict, give_subnet_interconnexion, get_subnet_interconnexion
+
+
 
 def create_base_cfg(base_config : list, router : str) -> None :
     """
@@ -16,7 +18,6 @@ def create_base_cfg(base_config : list, router : str) -> None :
 
 
 
-
 def create_loopback_interface(router : str) -> None :
     """ 
     Insert the loopback lines at the right place in the config file of a given router
@@ -25,8 +26,6 @@ def create_loopback_interface(router : str) -> None :
     index_line = find_index(router, "ip tcp synwait-time 5\n")
     #Insert the loopback part 
     insert_line(router, index_line, f"interface Loopback0\n no ip address\n ipv6 address 2001::{router[1:]}/128\n ipv6 enable\n")
-
-
 
 
 
@@ -42,7 +41,7 @@ def create_interfaces(router: str, topology: dict, AS: str) -> None:
         ipv6 enable
     """
     # Creates the subnet_dict
-    subnet_dict = give_subnet_number(topology)
+    subnet_dict = give_subnet_dict(topology)
 
     # Finds the line where to insert the interface
     index_line = find_index(router, line="ip tcp synwait-time 5\n")
