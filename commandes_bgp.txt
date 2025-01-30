@@ -110,6 +110,21 @@ write
 Adapter les adresses, les numéros d'AS et les protocoles aux autres routeurs de bordure
 
 
+Configurer iBGP sur des routeurs : Ne fonctionne pas aevc les adresses des interfaces apparement
+
+conf t
+router bgp 100
+no bgp default ipv4-unicast
+bgp router-id X.X.X.X
+neighbor [ADDRESSES VOISINS] remote-as 100
+address-family ipv6 unicast
+neighbor [ADDRESSES VOISINS] activate
+redistribute rip
+no synchronization
+end
+write
+
+
 
 
 
