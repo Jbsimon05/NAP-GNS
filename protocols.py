@@ -20,8 +20,6 @@ def activate_protocols(AS : str, router : str, topology : dict) -> None :
     #activate_bgp(...)
 
 
-
-
 def give_ID(router : str) -> str:
     """
     For a given router, give his ID
@@ -35,8 +33,6 @@ def give_ID(router : str) -> str:
     return f"{x}.{x}.{x}.{x}"
 
 
-
-
 def is_rip(topology : dict, AS : str) -> bool :
     """
     Return True if RIP must be activated, else False
@@ -44,13 +40,11 @@ def is_rip(topology : dict, AS : str) -> bool :
     return topology[AS]['protocol'] == "RIP"
 
 
-
-
 def activate_rip(router : str, topology : dict, AS : str) -> None :
     """
     Activates RIP on the given router for all its interfaces
     """
-    # Enableling RIP
+    # Enabling RIP
     index_line = find_index(router, "no ip http secure-server\n")
     insert_line(router, index_line, f"ipv6 router rip process\n redistribute connected\n")
 
@@ -60,15 +54,11 @@ def activate_rip(router : str, topology : dict, AS : str) -> None :
         insert_line(router, index_line, f" ipv6 rip process enable\n")
 
 
-
-
 def is_ospf(topology : dict, AS : str) -> bool :
     """
     Return True if RIP must be activated, else False
     """
     return topology[AS]['protocol'] == "OSPF"
-
-
 
 
 def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None :
@@ -93,4 +83,3 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
             if router in topology[AS]["neighbor"][AS_neighbor].keys():
                 for interface in topology[AS]["neighbor"][AS_neighbor][router].values():
                     insert_line(router, index_line, f" passive-interface {interface}\n")
-                    
