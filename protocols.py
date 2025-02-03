@@ -1,4 +1,4 @@
-from tools import insert_line, find_index, is_border_router
+from tools import insert_line, find_index, is_border_router, generate_addresses_dict
 
 
 
@@ -17,7 +17,7 @@ def activate_protocols(AS : str, router : str, topology : dict) -> None :
         activate_ospf(router, topology, AS, router_ID)
     
     # Activate BGP
-    #activate_bgp(...)
+    activate_bgp(router, topology, AS)
 
 
 def give_ID(router : str) -> str:
@@ -53,6 +53,11 @@ def activate_rip(router : str, topology : dict, AS : str) -> None :
         index_line = find_index(router, f"interface {interface}\n") + 4
         insert_line(router, index_line, f" ipv6 rip process enable\n")
 
+    # Activates RIP on the loopback interface
+    index_line = find_index(router, "interface Loopback0\n") + 3
+    insert_line(router, index_line, f" ipv6 rip process enable\n")
+
+
 
 def is_ospf(topology : dict, AS : str) -> bool :
     """
@@ -83,3 +88,63 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
             if router in topology[AS]["neighbor"][AS_neighbor].keys():
                 for interface in topology[AS]["neighbor"][AS_neighbor][router].values():
                     insert_line(router, index_line, f" passive-interface {interface}\n")
+    
+    # Activates OSPF on the loopback interface
+    index_line = find_index(router, "interface Loopback0\n") + 3
+    insert_line(router, index_line, f" ipv6 ospf 1 area 0\n")
+
+
+
+def create_networks(topology, AS, routeur, subnet_dict, index_line):
+    """
+    Adds network statements to the BGP configuration for the given router.
+    """
+    pass
+
+
+def activate_bgp(routeur: str, topology: dict, AS: str) -> None:
+    """
+    Activates BGP on the given router using the Loopback addresses of its neighbors
+    """
+    # Generate the addresses dictionary
+    addresses_dict = generate_addresses_dict(topology)
+
+    # Find the line to insert BGP configuration
+    index_line = find_index(routeur, "ip forward-protocol nd\n") - 1
+
+    # Insert BGP configuration
+    insert_line(routeur, index_line,
+                f"router bgp 10{AS[-1]}\n"
+                f" bgp router-id {give_ID(routeur)}\n"
+                f" bgp log-neighbor-changes\n"
+                f" no bgp default ipv4-unicast\n")
+    index_line += 4
+
+    # Add neighbors for BGP
+    for neighbor_info in addresses_dict[routeur]:
+        for neighbor, details in neighbor_info.items():
+            interface, ipv6_address, neighbor_AS = details
+            # Use the Loopback address of the neighbor
+            neighbor_loopback = f"2001::{neighbor[1:]}"
+            insert_line(routeur, index_line, f" neighbor {neighbor_loopback} remote-as 10{neighbor_AS[-1]}\n")
+            insert_line(routeur, index_line + 1, f" neighbor {neighbor_loopback} update-source Loopback0\n")
+            index_line += 2
+
+    # Add address-family for IPv6
+    insert_line(routeur, index_line, " address-family ipv4\n exit-address-family\n address-family ipv6\n")
+    index_line += 3
+
+    # Activate neighbors in address-family
+    neighborConf = ""
+    index_sum = 0
+    for neighbor_info in addresses_dict[routeur]:
+        for neighbor, details in neighbor_info.items():
+            interface, ipv6_address, neighbor_AS = details
+            # Use the Loopback address of the neighbor
+            neighbor_loopback = f"2001::{neighbor[1:]}"
+            neighborConf += f"  neighbor {neighbor_loopback} activate\n"
+            index_sum += 1
+    insert_line(routeur, index_line, neighborConf)
+    index_line += index_sum
+
+    insert_line(routeur, index_line, " exit-address-family\n")

@@ -105,3 +105,64 @@ def get_subnet_interconnexion(AS : str, subnet_interconnexion_dict : dict, route
     Retrieve the IPv6 address of an interconnection subnet between two given routers
     """
     return subnet_interconnexion_dict[AS][(routeur1, routeur2)] or subnet_interconnexion_dict[AS][(routeur2, routeur1)]
+
+
+def generate_addresses_dict(topology: dict) -> dict:
+    """
+    Generates a dictionary with neighbors, interfaces, IP addresses, and AS for each router.
+    
+    Output format:
+    {
+        "R1": [{"R2": ["interface", "ipv6 address", "AS"]}, {"R3": ["interface", "ipv6 address", "AS"]}, ...],
+        "R2": [{"R1": ["interface", "ipv6 address", "AS"]}, {"R4": ["interface", "ipv6 address", "AS"]}, ...],
+        ...
+    }
+    """
+    router_neighbors = {}
+
+    # Creates the subnet_dict
+    subnet_dict = give_subnet_dict(topology)
+    subnet_interconnexion_dict = give_subnet_interconnexion(topology, subnet_dict)
+
+    # Iterate over each AS
+    for AS in topology:
+        # Iterate over each router in the current AS
+        for router in topology[AS]['routers']:
+            if router not in router_neighbors:
+                router_neighbors[router] = []
+
+            # Iterate over each neighbor of the current router
+            for neighbor, interface in topology[AS]['routers'][router].items():
+                # To ensure it's in the correct order
+                if router[1:] < neighbor[1:]:
+                    subnet_index = subnet_dict[AS][(router, neighbor)]
+                    router_index = 1
+                else:
+                    subnet_index = subnet_dict[AS][(neighbor, router)]
+                    router_index = 2
+                ipv6_address = f"{topology[AS]['address']}{subnet_index}::{router_index}{topology[AS]['subnet_mask']}"
+                router_neighbors[router].append({neighbor: [interface, ipv6_address, AS]})
+
+    # Handle inter-AS connections
+    for AS in topology:
+        for AS_neighbor in topology[AS]['neighbor']:
+            for router1 in topology[AS]['neighbor'][AS_neighbor]:
+                for router2, interface in topology[AS]['neighbor'][AS_neighbor][router1].items():
+                    if router1 not in router_neighbors:
+                        router_neighbors[router1] = []
+                    if router2 not in router_neighbors:
+                        router_neighbors[router2] = []
+
+                    # Check if the connection already exists to avoid duplication
+                    if not any(neighbor.get(router2) for neighbor in router_neighbors[router1]):
+                        if int(AS[3:]) < int(AS_neighbor[3:]):
+                            ipv6_address1 = f"{topology[AS]['address'][:-1]}{get_subnet_interconnexion(AS, subnet_interconnexion_dict, router1, router2)}{topology[AS]['subnet_mask']}"
+                            ipv6_address2 = f"{topology[AS]['address'][:-1]}{get_subnet_interconnexion(AS_neighbor, subnet_interconnexion_dict, router2, router1)}{topology[AS]['subnet_mask']}"
+                        else:
+                            ipv6_address1 = f"{topology[AS]['address'][:-1]}{get_subnet_interconnexion(AS_neighbor, subnet_interconnexion_dict, router2, router1)}{topology[AS]['subnet_mask']}"
+                            ipv6_address2 = f"{topology[AS]['address'][:-1]}{get_subnet_interconnexion(AS, subnet_interconnexion_dict, router1, router2)}{topology[AS]['subnet_mask']}"
+
+                        router_neighbors[router1].append({router2: [interface, ipv6_address1, AS_neighbor]})
+                        router_neighbors[router2].append({router1: [interface, ipv6_address2, AS]})
+
+    return router_neighbors
