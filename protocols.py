@@ -94,14 +94,6 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
     insert_line(router, index_line, f" ipv6 ospf 1 area 0\n")
 
 
-
-def create_networks(topology, AS, routeur, subnet_dict, index_line):
-    """
-    Adds network statements to the BGP configuration for the given router.
-    """
-    pass
-
-
 def activate_bgp(routeur: str, topology: dict, AS: str) -> None:
     """
     Activates BGP on the given router using the Loopback addresses of its neighbors
@@ -124,26 +116,43 @@ def activate_bgp(routeur: str, topology: dict, AS: str) -> None:
     for neighbor_info in addresses_dict[routeur]:
         for neighbor, details in neighbor_info.items():
             interface, ipv6_address, neighbor_AS = details
-            # Use the Loopback address of the neighbor
-            neighbor_loopback = f"2001::{neighbor[1:]}"
-            insert_line(routeur, index_line, f" neighbor {neighbor_loopback} remote-as 10{neighbor_AS[-1]}\n")
-            insert_line(routeur, index_line + 1, f" neighbor {neighbor_loopback} update-source Loopback0\n")
-            index_line += 2
+            if AS == neighbor_AS:
+                # Use the Loopback address of the neighbor
+                neighbor_loopback = f"2001::{neighbor[1:]}"
+                insert_line(routeur, index_line, f" neighbor {neighbor_loopback} remote-as 10{neighbor_AS[-1]}\n")
+                insert_line(routeur, index_line + 1, f" neighbor {neighbor_loopback} update-source Loopback0\n")
+                index_line += 2
+            else:
+                # Use the link address between the two routers
+                link_address = ipv6_address.split("/")[0]
+                insert_line(routeur, index_line, f" neighbor {link_address} remote-as 10{neighbor_AS[-1]}\n")
+                index_line += 1
 
     # Add address-family for IPv6
-    insert_line(routeur, index_line, " address-family ipv4\n exit-address-family\n address-family ipv6\n")
-    index_line += 3
+    insert_line(routeur, index_line, " address-family ipv4\n exit-address-family\n address-family ipv6\n  network 2001::/128\n")
+    index_line += 4
 
-    # Activate neighbors in address-family
+    # Activate neighbors in address-family and add network statements
     neighborConf = ""
+    networkConf = ""
     index_sum = 0
     for neighbor_info in addresses_dict[routeur]:
         for neighbor, details in neighbor_info.items():
             interface, ipv6_address, neighbor_AS = details
-            # Use the Loopback address of the neighbor
-            neighbor_loopback = f"2001::{neighbor[1:]}"
-            neighborConf += f"  neighbor {neighbor_loopback} activate\n"
+            if AS == neighbor_AS:
+                # Use the Loopback address of the neighbor
+                neighbor_loopback = f"2001::{neighbor[1:]}"
+                neighborConf += f"  neighbor {neighbor_loopback} activate\n"
+            else:
+                # Use the link address between the two routers
+                link_address = ipv6_address.split("/")[0]
+                neighborConf += f"  neighbor {link_address} activate\n"
+            # Format the network address
+            network_address = ipv6_address.split("::")[0] + "::/64"
+            networkConf += f"  network {network_address}\n"
             index_sum += 1
+    insert_line(routeur, index_line, networkConf)
+    index_line += index_sum
     insert_line(routeur, index_line, neighborConf)
     index_line += index_sum
 
