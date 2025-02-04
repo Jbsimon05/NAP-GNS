@@ -46,7 +46,8 @@ def activate_rip(router : str, topology : dict, AS : str) -> None :
     """
     # Enabling RIP
     index_line = find_index(router, "no ip http secure-server\n")
-    insert_line(router, index_line, f"ipv6 router rip process\n redistribute connected\n")
+    router_ID = give_ID(router)
+    insert_line(router, index_line, f"ipv6 router rip process\n router-id {router_ID}\n redistribute connected\n")
     
     # Activates RIP on all the interfaces
     for interface in topology[AS]['routers'][router].values() :
@@ -72,7 +73,7 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
     """
     # Enable OSPF and set the router ID
     index_line = find_index(router, "no ip http secure-server\n")
-    insert_line(router, index_line, f"ipv6 router ospf 1\n router-id {router_ID}\n")
+    insert_line(router, index_line, f"ipv6 router ospf 1\n router-id {router_ID}\n redistribute connected\n")
 
     # Activates OSPF on all the interfaces
     for interface in topology[AS]['routers'][router].values():
@@ -92,6 +93,8 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
     # Activates OSPF on the loopback interface
     index_line = find_index(router, "interface Loopback0\n") + 3
     insert_line(router, index_line, f" ipv6 ospf 1 area 0\n")
+
+
 
 
 def activate_bgp(routeur: str, topology: dict, AS: str) -> None:
@@ -124,7 +127,7 @@ def activate_bgp(routeur: str, topology: dict, AS: str) -> None:
                 index_line += 2
             else:
                 # Use the link address between the two routers
-                link_address = ipv6_address.split("/")[0]
+                link_address = ipv6_address.split("::")[0] + "::" + ("2" if ipv6_address.endswith("::1/64") else "1")
                 insert_line(routeur, index_line, f" neighbor {link_address} remote-as 10{neighbor_AS[-1]}\n")
                 index_line += 1
 
@@ -145,7 +148,7 @@ def activate_bgp(routeur: str, topology: dict, AS: str) -> None:
                 neighborConf += f"  neighbor {neighbor_loopback} activate\n"
             else:
                 # Use the link address between the two routers
-                link_address = ipv6_address.split("/")[0]
+                link_address = ipv6_address.split("::")[0] + "::" + ("2" if ipv6_address.endswith("::1/64") else "1")
                 neighborConf += f"  neighbor {link_address} activate\n"
             # Format the network address
             network_address = ipv6_address.split("::")[0] + "::/64"
