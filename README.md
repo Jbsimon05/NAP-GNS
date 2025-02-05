@@ -1,6 +1,6 @@
 # Network Automation Project
 
-    Jean-Baptiste SIMON / Hugo NOEL
+Jean-Baptiste SIMON / Hugo NOEL
 
 ## Objectifs
 
@@ -59,7 +59,7 @@ Ce module gère le déplacement des fichiers de configuration générés vers le
 Pour exécuter le script principal et générer les configurations des routeurs, utilisez la commande suivante :
 
 ```bash
-python main.py
+python3 main.py
 ```
 
 Le fichier `intends.json` doit contenir les informations nécessaires pour configurer les routeurs des différents AS. Le script `main.py` lit ce fichier JSON et génère les configurations des routeurs en conséquence.
