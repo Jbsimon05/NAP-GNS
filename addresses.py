@@ -4,11 +4,9 @@ from tools import insert_line, find_index, is_border_router, generate_addresses_
 def create_base_cfg(base_config: list, router: str) -> None:
     """
     Creates the base config file named iX_startup-config.cfg with X being the number/name of the router.
-
     Args:
         base_config (list): The base configuration lines.
         router (str): The router identifier.
-
     The file contains all the lines from the base_config list plus the hostname of the router.
     """
     # Writes the base_config in the config file
@@ -18,11 +16,9 @@ def create_base_cfg(base_config: list, router: str) -> None:
     # Writes the hostname in the config file
     insert_line(router, 3, f"hostname {router}\n")
 
-
 def create_loopback_interface(router: str) -> None:
     """
     Insert the loopback lines at the right place in the config file of a given router.
-
     Args:
         router (str): The router identifier.
     """
@@ -31,16 +27,13 @@ def create_loopback_interface(router: str) -> None:
     # Insert the loopback part
     insert_line(router, index_line, f"interface Loopback0\n no ip address\n ipv6 address 2001::{router[1:]}/128\n ipv6 enable\n")
 
-
 def old_create_interfaces(router: str, topology: dict, AS: str) -> None:
     """
     Generate the interfaces with the correct IPv6 addresses for each router of each AS.
-
     Args:
         router (str): The router identifier.
         topology (dict): The network topology.
         AS (str): The AS identifier.
-
     Example:
         interface GigabitEthernet1/0
         no ip address
@@ -50,10 +43,8 @@ def old_create_interfaces(router: str, topology: dict, AS: str) -> None:
     """
     # Creates the subnet_dict
     subnet_dict = give_subnet_dict(topology)
-
     # Finds the line where to insert the interface
     index_line = find_index(router, line="ip tcp synwait-time 5\n")
-
     # Iterate over each neighbor in the AS topology
     for neighbor in topology[AS]['routers'][router].keys():
         # To ensure it's in the correct order
@@ -96,11 +87,9 @@ def old_create_interfaces(router: str, topology: dict, AS: str) -> None:
                         # Increment the index line
                         index_line += 5
 
-
 def create_interfaces(router: str, topology: dict, AS: str) -> None:
     """
     Generate the interfaces with the correct IPv6 addresses for each router of each AS.
-
     Args:
         router (str): The router identifier.
         topology (dict): The network topology.
@@ -108,10 +97,8 @@ def create_interfaces(router: str, topology: dict, AS: str) -> None:
     """
     # Generate the addresses dictionary
     addresses_dict = generate_addresses_dict(topology)
-
     # Finds the line where to insert the interface
     index_line = find_index(router, line="ip tcp synwait-time 5\n")
-
     # Iterate over each neighbor in the addresses dictionary
     for neighbor_info in addresses_dict[router]:
         for neighbor, details in neighbor_info.items():
