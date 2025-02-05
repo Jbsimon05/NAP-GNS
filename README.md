@@ -1,5 +1,7 @@
 # Network Automation Project
 
+    Jean-Baptiste SIMON / Hugo NOEL
+
 ## Objectifs
 
 Ce projet vise à comprendre les mécanismes du protocole de routage BGP, déployer un réseau utilisant BGP, étudier la convergence de BGP et implémenter des politiques de routage à l'aide de filtres.
