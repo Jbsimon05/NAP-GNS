@@ -2,55 +2,78 @@ from tools import insert_line, find_index, is_border_router, generate_addresses_
 
 
 
-def activate_protocols(AS : str, router : str, topology : dict) -> None :
-    """ 
-    For a given router, activate RIP or OSPF
-    Then activate BGP (hopefully)
+def activate_protocols(AS: str, router: str, topology: dict) -> None:
+    """
+    For a given router, activate RIP or OSPF, then activate BGP.
+
+    Args:
+        AS (str): The AS identifier.
+        router (str): The router identifier.
+        topology (dict): The network topology.
     """
     # Creation of a router ID (unique for each router)
     router_ID = give_ID(router)
 
     # Activate RIP or OSPF
-    if is_rip(topology, AS) :
+    if is_rip(topology, AS):
         activate_rip(router, topology, AS)
-    elif is_ospf(topology, AS) :
+    elif is_ospf(topology, AS):
         activate_ospf(router, topology, AS, router_ID)
-    
+
     # Activate BGP
     activate_bgp(router, topology, AS)
 
 
-def give_ID(router : str) -> str:
+def give_ID(router: str) -> str:
     """
-    For a given router, give his ID
+    For a given router, give its ID.
 
-    Exemple : R1 -> 1.1.1.1
-              R13 -> 13.13.13.13
+    Args:
+        router (str): The router identifier.
+
+    Returns:
+        str: The router ID.
+
+    Example:
+        R1 -> 1.1.1.1
+        R13 -> 13.13.13.13
     """
     # Get the number of the router
     x = router[1:]
-    # Return it 
+    # Return it
     return f"{x}.{x}.{x}.{x}"
 
 
-def is_rip(topology : dict, AS : str) -> bool :
+def is_rip(topology: dict, AS: str) -> bool:
     """
-    Return True if RIP must be activated, else False
+    Return True if RIP must be activated, else False.
+
+    Args:
+        topology (dict): The network topology.
+        AS (str): The AS identifier.
+
+    Returns:
+        bool: True if RIP must be activated, False otherwise.
     """
     return topology[AS]['protocol'] == "RIP"
 
 
-def activate_rip(router : str, topology : dict, AS : str) -> None :
+def activate_rip(router: str, topology: dict, AS: str) -> None:
     """
-    Activates RIP on the given router for all its interfaces
+    Activates RIP on the given router for all its interfaces.
+
+    Args:
+        router (str): The router identifier.
+        topology (dict): The network topology.
+        AS (str): The AS identifier.
     """
     # Enabling RIP
     index_line = find_index(router, "no ip http secure-server\n")
     router_ID = give_ID(router)
     insert_line(router, index_line, f"ipv6 router rip process\n router-id {router_ID}\n redistribute connected\n")
-    
+
     # Activates RIP on all the interfaces
-    for interface in topology[AS]['routers'][router].values() :
+    for interface in topology[AS]['routers'][router].values():
         index_line = find_index(router, f"interface {interface}\n") + 4
         insert_line(router, index_line, f" ipv6 rip process enable\n")
 
@@ -59,17 +82,29 @@ def activate_rip(router : str, topology : dict, AS : str) -> None :
     insert_line(router, index_line, f" ipv6 rip process enable\n")
 
 
-
-def is_ospf(topology : dict, AS : str) -> bool :
+def is_ospf(topology: dict, AS: str) -> bool:
     """
-    Return True if RIP must be activated, else False
+    Return True if OSPF must be activated, else False.
+
+    Args:
+        topology (dict): The network topology.
+        AS (str): The AS identifier.
+
+    Returns:
+        bool: True if OSPF must be activated, False otherwise.
     """
     return topology[AS]['protocol'] == "OSPF"
 
 
-def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None :
+def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None:
     """
-    Activates OSPF on the given router for all its interfaces
+    Activates OSPF on the given router for all its interfaces.
+
+    Args:
+        router (str): The router identifier.
+        topology (dict): The network topology.
+        AS (str): The AS identifier.
+        router_ID (str): The router ID.
     """
     # Enable OSPF and set the router ID
     index_line = find_index(router, "no ip http secure-server\n")
@@ -79,9 +114,9 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
     for interface in topology[AS]['routers'][router].values():
         index_line = find_index(router, f"interface {interface}\n") + 4
         insert_line(router, index_line, f" ipv6 ospf 1 area 0\n")
-    
-    # If the router is a border router on an interface : make this interface passive to avoid packet pollution
-    if is_border_router(router, topology, AS) :
+
+    # If the router is a border router on an interface: make this interface passive to avoid packet pollution
+    if is_border_router(router, topology, AS):
         index_line = find_index(router, "ip forward-protocol nd\n")
         insert_line(router, index_line, "router ospf 1\n")
         index_line = find_index(router, f" router-id {router_ID}\n")
@@ -89,17 +124,20 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None 
             if router in topology[AS]["neighbor"][AS_neighbor].keys():
                 for interface in topology[AS]["neighbor"][AS_neighbor][router].values():
                     insert_line(router, index_line, f" passive-interface {interface}\n")
-    
+
     # Activates OSPF on the loopback interface
     index_line = find_index(router, "interface Loopback0\n") + 3
     insert_line(router, index_line, f" ipv6 ospf 1 area 0\n")
 
 
-
-
 def activate_bgp(routeur: str, topology: dict, AS: str) -> None:
     """
-    Activates BGP on the given router using the Loopback addresses of its neighbors
+    Activates BGP on the given router using the Loopback addresses of its neighbors.
+
+    Args:
+        routeur (str): The router identifier.
+        topology (dict): The network topology.
+        AS (str): The AS identifier.
     """
     # Generate the addresses dictionary
     addresses_dict = generate_addresses_dict(topology)
