@@ -42,29 +42,35 @@ base_config = [
 
 
 def main(topology) :
+    """
+    Main function to configure routers based on the given topology.
+
+    Args:
+        topology (dict): The network topology.
+    """
     for AS in topology :
         for router in topology[AS]['routers'] :
-            # config file vierge
+            # Create a blank config file
             create_base_cfg(base_config, router)
 
-            # interfaces Loopback0
+            # Configure Loopback0 interface
             create_loopback_interface(router)
 
-            # adressage ipv6
+            # Configure IPv6 addressing
             create_interfaces(router, topology, AS)
 
-            # RIP + OSPF + BGP
+            # Activate RIP, OSPF, and BGP protocols
             activate_protocols(AS, router, topology)
 
 
 
 if __name__ == "__main__":
     with open("intends.json", "r") as file:
-        #var topo à partir de json
+        # Load topology from JSON file
         topology = json.load(file)
     start = time.time()
     main(topology)
     end = time.time()
-    print("Temps d'exécution total :", end - start)
+    print("Total execution time:", end - start)
 
-# exécuter move_files en changeant le chemin d'accès
+# Execute move_files with the correct path
