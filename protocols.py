@@ -88,7 +88,7 @@ def activate_ospf(router: str, topology: dict, AS: str, router_ID: str) -> None:
     """
     # Enable OSPF and set the router ID
     index_line = find_index(router, "no ip http secure-server\n")
-    insert_line(router, index_line, f"ipv6 router ospf 1\n router-id {router_ID}\n redistribute connected\n")
+    insert_line(router, index_line, f"ipv6 router ospf 1\n router-id {router_ID}\n redistribute connected\n maximum-paths 4\n auto-cost reference-bandwidth 10000\n")
     # Activates OSPF on all the interfaces
     for interface in topology[AS]['routers'][router].values():
         index_line = find_index(router, f"interface {interface}\n") + 4
